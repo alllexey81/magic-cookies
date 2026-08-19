@@ -81,30 +81,39 @@
   .start-btn:hover { transform: scale(1.05); }
   .start-btn:active { transform: scale(0.98); }
 
-  /* ---- Печеньки ---- */
-  #board { position: absolute; inset: 0; }
-  .cookie {
-    position: absolute; cursor: pointer;
-    transition: transform 0.2s;
-    filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
-  }
-  .cookie:hover { transform: scale(1.08) rotate(3deg); }
-  .cookie:active { transform: scale(0.95); }
-  .cookie.popped { animation: pop 0.5s forwards; pointer-events: none; }
-  .cookie.shake { animation: shake 0.5s; }
+/* ---- Печеньки ---- */
+#board { position: absolute; inset: 0; }
+.cookie {
+  position: absolute;
+  cursor: pointer;
+  transition: transform 0.2s;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
 
-  @keyframes pop {
-    0%   { transform: scale(1); opacity: 1; }
-    50%  { transform: scale(1.6); opacity: 0.7; }
-    100% { transform: scale(0); opacity: 0; }
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-14px) rotate(-5deg); }
-    40% { transform: translateX(14px) rotate(5deg); }
-    60% { transform: translateX(-11px) rotate(-3deg); }
-    80% { transform: translateX(11px) rotate(3deg); }
-  }
+  /* 👇 ДОБАВЛЕНО — жёсткий системный шрифт для iOS */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  font-style: normal !important;
+  font-variant: normal !important;
+  font-weight: 900 !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.cookie:hover { transform: scale(1.08) rotate(3deg); }
+.cookie:active { transform: scale(0.95); }
+.cookie.popped { animation: pop 0.5s forwards; pointer-events: none; }
+.cookie.shake { animation: shake 0.5s; }
+
+@keyframes pop {
+  0%   { transform: scale(1); opacity: 1; }
+  50%  { transform: scale(1.6); opacity: 0.7; }
+  100% { transform: scale(0); opacity: 0; }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-14px) rotate(-5deg); }
+  40% { transform: translateX(14px) rotate(5deg); }
+  60% { transform: translateX(-11px) rotate(-3deg); }
+  80% { transform: translateX(11px) rotate(3deg); }
+}
 
   #effects { position: absolute; inset: 0; pointer-events: none; z-index: 100; }
 
