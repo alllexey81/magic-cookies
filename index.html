@@ -8,7 +8,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Comic Sans MS', 'Marker Felt', normal;
+    font-family: 'Chalkboard SE', 'Marker Felt', 'Comic Sans MS', cursive, sans-serif;
     background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 60%, #90EE90 60%, #7CCD7C 100%);
     min-height: 100vh;
     overflow: hidden;
@@ -90,7 +90,7 @@
   filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
 
   /* 👇 ДОБАВЛЕНО — жёсткий системный шрифт для iOS */
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
+  font-family: -apple-system, 'Chalkboard SE', BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
   font-style: normal !important;
   font-variant: normal !important;
   font-weight: 900 !important;
@@ -441,7 +441,7 @@
     if ('ФЦЧ'.includes(letter)) fontSize = 42;
 
     svg.innerHTML = shapePath +
-      `<text x="50" y="${50 + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-weight="bold" fill="#5a3a1f" font-family="'Comic Sans MS', normal" style="paint-order:stroke;stroke:#fff;stroke-width:2">${letter}</text>`;
+      `<text x="50" y="${50 + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-weight="bold" fill="#5a3a1f" font-family="'Chalkboard SE', normal" style="paint-order:stroke;stroke:#fff;stroke-width:2">${letter}</text>`;
 
     return svg;
   }
