@@ -2,16 +2,17 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Волшебное печенье папы</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Chalkboard SE', 'Comic Sans MS', 'Arial Rounded MT Bold', 'Helvetica Neue', Arial, sans-serif;
-    font-weight: bold;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    /* Детский, чёткий шрифт; на iPhone берётся системный Arial/Helvetica, а не «Marker Felt» */
+    font-family: 'Nunito', 'Baloo 2', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 60%, #90EE90 60%, #7CCD7C 100%);
     min-height: 100vh;
     overflow: hidden;
@@ -28,9 +29,13 @@
 
   /* ---- Папа и пузырь с текстом (крупнее) ---- */
   .header {
-    position: absolute; top: 15px; left: 15px;
+    position: absolute; top: 15px; left: 15px; right: 15px;
     display: flex; align-items: center; gap: 18px;
     z-index: 10;
+  }
+  .header-left {
+    display: flex; align-items: center; gap: 18px;
+    flex: 1 1 auto; min-width: 0;   /* позволяет пузырю сжиматься, а не наезжать */
   }
   .dad-photo {
     width: 150px; height: 150px;
@@ -49,8 +54,6 @@
     position: relative;
     max-width: 560px;
     line-height: 1.3;
-    font-family: inherit;
-    font-weight: bold;
   }
   .speech-bubble::before {
     content: '';
@@ -64,7 +67,7 @@
     40% { transform: scale(1.08); }
     100% { transform: scale(1); }
   }
-  .task-letter { color: #FF3D7F; font-size: 1.35em; }
+  .task-letter { color: #FF3D7F; font-size: 1.35em; font-weight: bold; }
 
   /* ---- Стартовый экран ---- */
   .start-content {
@@ -72,7 +75,6 @@
     padding: 35px 40px; border-radius: 30px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     max-width: 90%;
-    font-family: inherit;
   }
   .start-content h1 { font-size: 42px; color: #FF6B9D; margin-bottom: 15px; }
   .start-content p { font-size: 22px; color: #555; margin-bottom: 25px; line-height: 1.4; }
@@ -82,9 +84,7 @@
     padding: 18px 45px; font-size: 28px;
     border-radius: 50px; cursor: pointer;
     box-shadow: 0 6px 15px rgba(255,107,157,0.4);
-    font-family: inherit;
-    font-weight: bold;
-    transition: transform 0.2s;
+    font-family: inherit; transition: transform 0.2s;
   }
   .start-btn:hover { transform: scale(1.05); }
   .start-btn:active { transform: scale(0.98); }
@@ -97,8 +97,10 @@
   transition: transform 0.2s;
   filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
 
-  /* Единый стек шрифтов для печенек – перекрывает всё */
-  font-family: 'Chalkboard SE', 'Comic Sans MS', 'Arial Rounded MT Bold', 'Helvetica Neue', Arial, sans-serif !important;
+  /* 👇 ДОБАВЛЕНО — жёсткий системный шрифт для iOS */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", 'Nunito', "Helvetica Neue", Arial, sans-serif !important;
+  font-style: normal !important;
+  font-variant: normal !important;
   font-weight: 900 !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -151,20 +153,19 @@
     padding: 10px 22px; font-size: 18px;
     border-radius: 30px; cursor: pointer;
     font-family: inherit;
-    font-weight: bold;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     transition: all 0.2s;
   }
   .control-btn:hover { background: #FF6B9D; color: white; }
 
   .score {
-    position: absolute; top: 20px; right: 20px;
+    flex: 0 0 auto;                 /* фиксированная ширина, стоит в ряду шапки */
+    align-self: flex-start;
     background: white; padding: 10px 20px;
     border-radius: 25px; font-size: 24px; color: #FF6B9D;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    white-space: nowrap;
     z-index: 10;
-    font-family: inherit;
-    font-weight: bold;
   }
 
   .clouds { position: absolute; inset: 0; height: 60%; pointer-events: none; z-index: 1; overflow: hidden; }
@@ -180,12 +181,26 @@
 
   /* Мобильная версия */
   @media (max-width: 700px) {
-    .dad-photo { width: 84px; height: 84px; border-width: 4px; }
-    .speech-bubble { font-size: 17px; max-width: 250px; padding: 10px 14px; }
-    .speech-bubble::before { top: 18px; }
+    .header { top: 10px; left: 10px; right: 10px; gap: 8px; }
+    .header-left { gap: 10px; }
+    .dad-photo { width: 64px; height: 64px; border-width: 4px; flex: 0 0 auto; }
+    .speech-bubble {
+      font-size: 16px; padding: 9px 12px; line-height: 1.25;
+      max-width: none;              /* пузырь сам сжимается во flex-строке */
+      flex: 1 1 auto; min-width: 0;
+    }
+    .speech-bubble::before { top: 16px; }
+    .score { font-size: 17px; padding: 7px 12px; }
     .start-content h1 { font-size: 28px; }
     .start-content p { font-size: 17px; }
     .control-btn { font-size: 15px; padding: 8px 16px; }
+  }
+
+  /* Совсем узкие экраны (iPhone SE / mini) */
+  @media (max-width: 400px) {
+    .dad-photo { width: 54px; height: 54px; }
+    .speech-bubble { font-size: 14px; padding: 7px 10px; }
+    .score { font-size: 15px; padding: 6px 10px; }
   }
 </style>
 </head>
@@ -204,11 +219,12 @@
   <div class="clouds" id="clouds"></div>
 
   <div class="header">
-    <img src="images/папа.png" alt="Папа" class="dad-photo">
-    <div class="speech-bubble" id="speech">Привет, Катюша!</div>
+    <div class="header-left">
+      <img src="images/папа.png" alt="Папа" class="dad-photo">
+      <div class="speech-bubble" id="speech">Привет, Катюша!</div>
+    </div>
+    <div class="score" id="score">⭐ 0</div>
   </div>
-
-  <div class="score" id="score">⭐ 0</div>
 
   <div id="board"></div>
 
@@ -449,9 +465,8 @@
     if ('ЩШЮЪЫ'.includes(letter)) fontSize = 38;
     if ('ФЦЧ'.includes(letter)) fontSize = 42;
 
-    // Единый стек шрифтов и жирное начертание внутри SVG
     svg.innerHTML = shapePath +
-      `<text x="50" y="${50 + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-weight="bold" fill="#5a3a1f" font-family="'Chalkboard SE','Comic Sans MS','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" style="paint-order:stroke;stroke:#fff;stroke-width:2">${letter}</text>`;
+      `<text x="50" y="${50 + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-weight="800" fill="#5a3a1f" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" style="paint-order:stroke;stroke:#fff;stroke-width:2">${letter}</text>`;
 
     return svg;
   }
