@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Волшебное печенье папы</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Comic Sans MS', 'Marker Felt', cursive;
+    background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 60%, #90EE90 60%, #7CCD7C 100%);
+    min-height: 100vh;
+    overflow: hidden;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #startScreen, #gameScreen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  #gameScreen { display: none; }
+
+  /* ---- Папа и пузырь с текстом (крупнее) ---- */
+  .header {
+    position: absolute; top: 15px; left: 15px;
+    display: flex; align-items: center; gap: 18px;
+    z-index: 10;
+  }
+  .dad-photo {
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    border: 7px solid white;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+    object-fit: cover; background: #fff;
+  }
+  .speech-bubble {
+    background: white;
+    padding: 18px 28px;
+    border-radius: 24px;
+    font-size: 27px;
+    color: #333;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+    position: relative;
+    max-width: 560px;
+    line-height: 1.3;
+  }
+  .speech-bubble::before {
+    content: '';
+    position: absolute; left: -20px; top: 34px;
+    border: 11px solid transparent;
+    border-right-color: white;
+  }
+  .speech-bubble.pulse { animation: bubblePulse .6s; }
+  @keyframes bubblePulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+  .task-letter { color: #FF3D7F; font-size: 1.35em; font-weight: bold; }
+
+  /* ---- Стартовый экран ---- */
+  .start-content {
+    text-align: center; background: white;
+    padding: 35px 40px; border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 90%;
+  }
+  .start-content h1 { font-size: 42px; color: #FF6B9D; margin-bottom: 15px; }
+  .start-content p { font-size: 22px; color: #555; margin-bottom: 25px; line-height: 1.4; }
+  .start-btn {
+    background: linear-gradient(135deg, #FF6B9D, #FFA07A);
+    color: white; border: none;
+    padding: 18px 45px; font-size: 28px;
+    border-radius: 50px; cursor: pointer;
+    box-shadow: 0 6px 15px rgba(255,107,157,0.4);
+    font-family: inherit; transition: transform 0.2s;
+  }
+  .start-btn:hover { transform: scale(1.05); }
+  .start-btn:active { transform: scale(0.98); }
+
+  /* ---- Печеньки ---- */
+  #board { position: absolute; inset: 0; }
+  .cookie {
+    position: absolute; cursor: pointer;
+    transition: transform 0.2s;
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
+  }
+  .cookie:hover { transform: scale(1.08) rotate(3deg); }
+  .cookie:active { transform: scale(0.95); }
+  .cookie.popped { animation: pop 0.5s forwards; pointer-events: none; }
+  .cookie.shake { animation: shake 0.5s; }
+
+  @keyframes pop {
+    0%   { transform: scale(1); opacity: 1; }
+    50%  { transform: scale(1.6); opacity: 0.7; }
+    100% { transform: scale(0); opacity: 0; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-14px) rotate(-5deg); }
+    40% { transform: translateX(14px) rotate(5deg); }
+    60% { transform: translateX(-11px) rotate(-3deg); }
+    80% { transform: translateX(11px) rotate(3deg); }
+  }
+
+  #effects { position: absolute; inset: 0; pointer-events: none; z-index: 100; }
+
+  /* ---- Фото-сюрприз (1.png .. 20.png) ---- */
+  .surprise {
+    position: absolute; object-fit: contain;
+    z-index: 60; pointer-events: none;
+    border: 7px solid #fff; border-radius: 22px;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+    animation: surprisePop 0.6s ease-out;
+    transition: opacity .5s, transform .5s;
+  }
+  @keyframes surprisePop {
+    0%   { transform: scale(0) rotate(-180deg); opacity: 0; }
+    60%  { transform: scale(1.15) rotate(8deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+
+  /* ---- Кнопки и счёт ---- */
+  .controls {
+    position: absolute; bottom: 15px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 12px; z-index: 10;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .control-btn {
+    background: white; border: 3px solid #FF6B9D; color: #FF6B9D;
+    padding: 10px 22px; font-size: 18px;
+    border-radius: 30px; cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+  }
+  .control-btn:hover { background: #FF6B9D; color: white; }
+
+  .score {
+    position: absolute; top: 20px; right: 20px;
+    background: white; padding: 10px 20px;
+    border-radius: 25px; font-size: 24px; color: #FF6B9D;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 10;
+  }
+
+  .clouds { position: absolute; inset: 0; height: 60%; pointer-events: none; z-index: 1; overflow: hidden; }
+  .cloud {
+    position: absolute; background: white; border-radius: 50%; opacity: 0.85;
+    box-shadow: 30px 10px 0 -5px white, 60px 0 0 -10px white, -25px 10px 0 -5px white;
+    animation: float linear infinite;
+  }
+  @keyframes float {
+    from { transform: translateX(-250px); }
+    to   { transform: translateX(calc(100vw + 250px)); }
+  }
+
+  /* Мобильная версия */
+  @media (max-width: 700px) {
+    .dad-photo { width: 84px; height: 84px; border-width: 4px; }
+    .speech-bubble { font-size: 17px; max-width: 250px; padding: 10px 14px; }
+    .speech-bubble::before { top: 18px; }
+    .start-content h1 { font-size: 28px; }
+    .start-content p { font-size: 17px; }
+    .control-btn { font-size: 15px; padding: 8px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="startScreen">
+  <div class="start-content">
+    <img src="images/папа.png" alt="Папа" style="width:160px;height:160px;border-radius:50%;border:6px solid #FF6B9D;margin-bottom:15px;object-fit:cover;">
+    <h1>🍪 Волшебное печенье 🍪</h1>
+    <p>Папа испёк волшебное печенье с буквами!<br>Помоги найти нужные буквы!</p>
+    <button class="start-btn" onclick="startGame()">Начать игру!</button>
+  </div>
+</div>
+
+<div id="gameScreen">
+  <div class="clouds" id="clouds"></div>
+
+  <div class="header">
+    <img src="images/папа.png" alt="Папа" class="dad-photo">
+    <div class="speech-bubble" id="speech">Привет, Катюша!</div>
+  </div>
+
+  <div class="score" id="score">⭐ 0</div>
+
+  <div id="board"></div>
+
+  <canvas id="effects"></canvas>
+
+  <div class="controls">
+    <button class="control-btn" onclick="repeatTask()">🔊 Повторить</button>
+    <button class="control-btn" onclick="nextTask()">➡️ Другая буква</button>
+  </div>
+</div>
+
+<script>
+  const RUSSIAN_ALPHABET = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split('');
+  const SURPRISE_COUNT = 20;               // картинки 1 ... 20
+  const SURPRISE_EXTS = ['png', 'jpg', 'jpeg'];  // какие расширения пробовать
+  const surpriseExtCache = {};             // игра запоминает, где какой формат
+  const COOKIE_COLORS = [
+    { main: '#F4A4A4', dark: '#C97070' },
+    { main: '#FFD700', dark: '#C89520' },
+    { main: '#98D8E8', dark: '#5BA8C0' },
+    { main: '#B5E8B5', dark: '#6FB86F' },
+    { main: '#FFB347', dark: '#D88520' },
+    { main: '#DDA0DD', dark: '#A870A8' }
+  ];
+  const COOKIE_SHAPES = ['round', 'star', 'heart', 'flower', 'diamond', 'hexagon'];
+
+  let currentLetter = '';
+  let particles = [];
+  let surpriseTimeout;
+  let surpriseNum = 1;      // какой сюрприз показать следующим (1..20 по кругу)
+  let score = 0;
+  let busy = false;         // идёт «празднование» правильного ответа
+  let wrongActive = false;  // идёт озвучка ошибки + повтор задания
+  let roundToken = 0;       // защита от «старых» отложенных событий
+
+  // ================= ЗВУКИ =================
+  const sounds = {};
+  function initSounds() {
+    const files = ['instruction', 'correct', 'wrong'];
+    RUSSIAN_ALPHABET.forEach(l => files.push('find_' + l.toLowerCase()));
+    files.forEach(name => {
+      const audio = new Audio('sounds/' + name + '.mp3');
+      audio.preload = 'auto';
+      sounds[name] = audio;
+    });
+  }
+
+  function stopAllSounds() {
+    for (const key in sounds) {
+      try { sounds[key].pause(); sounds[key].currentTime = 0; } catch (e) {}
+    }
+  }
+
+  function playSound(name) {
+    const audio = sounds[name];
+    if (!audio) return;
+    stopAllSounds();
+    try { audio.currentTime = 0; audio.play().catch(() => {}); } catch (e) {}
+  }
+
+  // Проиграть звук, дождаться его окончания, затем выполнить callback.
+  // Если файла нет / он не загрузился — срабатывает запасной таймер.
+  function playSoundThen(name, fallbackMs, callback) {
+    const audio = sounds[name];
+    let fired = false;
+    const done = () => { if (!fired) { fired = true; callback(); } };
+
+    if (!audio) { setTimeout(done, fallbackMs); return; }
+
+    stopAllSounds();
+    audio.addEventListener('ended', done, { once: true });
+    try {
+      audio.currentTime = 0;
+      audio.play().catch(() => setTimeout(done, fallbackMs));
+    } catch (e) { setTimeout(done, fallbackMs); }
+
+    // файл не загрузился за 3.5 сек (например, ещё не записан) — не зависаем
+    setTimeout(() => { if (!fired && audio.readyState < 2) done(); }, 3500);
+    // страховочный потолок
+    setTimeout(done, 30000);
+  }
+
+  // ================= РЕЧЬ В ПУЗЫРЕ =================
+  function setSpeech(html) {
+    const bubble = document.getElementById('speech');
+    bubble.innerHTML = html;
+    bubble.classList.remove('pulse');
+    void bubble.offsetWidth;          // перезапуск анимации
+    bubble.classList.add('pulse');
+  }
+
+  function showTaskBubble() {
+    setSpeech('Найди букву <span class="task-letter">«' + currentLetter + '»</span>!');
+  }
+
+  // ================= ОБЛАКА =================
+  function createClouds() {
+    const container = document.getElementById('clouds');
+    for (let i = 0; i < 5; i++) {
+      const cloud = document.createElement('div');
+      cloud.className = 'cloud';
+      const size = 60 + Math.random() * 60;
+      cloud.style.width = size + 'px';
+      cloud.style.height = size * 0.5 + 'px';
+      cloud.style.top = Math.random() * 40 + '%';
+      cloud.style.animationDelay = -Math.random() * 40 + 's';
+      cloud.style.animationDuration = (35 + Math.random() * 25) + 's';
+      container.appendChild(cloud);
+    }
+  }
+
+  // ================= КОНФЕТТИ / САЛЮТ =================
+  function initCanvas() {
+    const canvas = document.getElementById('effects');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles = particles.filter(p => p.life > 0);
+
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.type === 'confetti') {
+          p.vy += 0.35; p.vx *= 0.99;
+          p.rotation += p.rotationSpeed;
+        } else if (p.type === 'firework') {
+          p.vy += 0.15; p.vx *= 0.98;
+        }
+        p.life -= p.decay;
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.translate(p.x, p.y);
+        if (p.rotation !== undefined) ctx.rotate(p.rotation);
+        ctx.fillStyle = p.color;
+        if (p.type === 'confetti') {
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      });
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+  }
+
+  function createConfetti(x, y, count) {
+    const colors = ['#FF6B9D', '#FFD700', '#4ECDC4', '#95E1D3', '#F38181', '#AA96DA', '#FCBAD3', '#FF8C42'];
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x, y,
+        vx: (Math.random() - 0.5) * 16,
+        vy: (Math.random() - 0.5) * 16 - 6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: Math.random() * 10 + 5,
+        life: 1, decay: 0.012,
+        type: 'confetti',
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.3
+      });
+    }
+  }
+
+  function createFirework(x, y) {
+    const colors = ['#FF6B9D', '#FFD700', '#4ECDC4', '#FF8C42', '#C06C84', '#FFFFFF'];
+    for (let i = 0; i < 50; i++) {
+      const angle = (i / 50) * Math.PI * 2;
+      const speed = Math.random() * 7 + 4;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: Math.random() * 4 + 2,
+        life: 1, decay: 0.018,
+        type: 'firework'
+      });
+    }
+  }
+
+  // ================= ПЕЧЕНЬКИ =================
+  function cookieSize() {
+    // Крупные на ПК, поменьше на телефоне
+    const s = Math.floor(Math.min(window.innerWidth / 3.7, window.innerHeight / 3.4));
+    return Math.max(110, Math.min(270, s));
+  }
+
+  function createCookieSVG(letter, shape, color) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    const size = cookieSize();
+    svg.setAttribute('width', size);
+    svg.setAttribute('height', size);
+
+    let shapePath = '';
+    const m = color.main, d = color.dark;
+
+    switch (shape) {
+      case 'round':
+        shapePath = `<circle cx="50" cy="50" r="45" fill="${m}" stroke="${d}" stroke-width="2"/>`;
+        for (let i = 0; i < 10; i++) {
+          const a = (i / 10) * Math.PI * 2;
+          const r = 28 + Math.random() * 8;
+          shapePath += `<circle cx="${50 + Math.cos(a) * r}" cy="${50 + Math.sin(a) * r}" r="2" fill="${d}"/>`;
+        }
+        break;
+      case 'star':
+        shapePath = `<polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="${m}" stroke="${d}" stroke-width="2"/>`;
+        break;
+      case 'heart':
+        shapePath = `<path d="M50,85 C50,85 10,60 10,35 C10,20 25,10 40,15 C45,17 48,22 50,27 C52,22 55,17 60,15 C75,10 90,20 90,35 C90,60 50,85 50,85 Z" fill="${m}" stroke="${d}" stroke-width="2"/>`;
+        break;
+      case 'flower':
+        shapePath = `
+          <circle cx="50" cy="22" r="18" fill="${m}" stroke="${d}" stroke-width="2"/>
+          <circle cx="78" cy="50" r="18" fill="${m}" stroke="${d}" stroke-width="2"/>
+          <circle cx="50" cy="78" r="18" fill="${m}" stroke="${d}" stroke-width="2"/>
+          <circle cx="22" cy="50" r="18" fill="${m}" stroke="${d}" stroke-width="2"/>
+          <circle cx="50" cy="50" r="20" fill="${m}" stroke="${d}" stroke-width="2"/>
+        `;
+        break;
+      case 'diamond':
+        shapePath = `<polygon points="50,5 95,50 50,95 5,50" fill="${m}" stroke="${d}" stroke-width="2"/>`;
+        break;
+      case 'hexagon':
+        shapePath = `<polygon points="25,5 75,5 95,50 75,95 25,95 5,50" fill="${m}" stroke="${d}" stroke-width="2"/>`;
+        break;
+    }
+
+    let fontSize = 48;
+    if ('ЩШЮЪЫ'.includes(letter)) fontSize = 38;
+    if ('ФЦЧ'.includes(letter)) fontSize = 42;
+
+    svg.innerHTML = shapePath +
+      `<text x="50" y="${50 + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-weight="bold" fill="#5a3a1f" font-family="'Comic Sans MS', cursive" style="paint-order:stroke;stroke:#fff;stroke-width:2">${letter}</text>`;
+
+    return svg;
+  }
+
+  function getRandomLetter() {
+    return RUSSIAN_ALPHABET[Math.floor(Math.random() * RUSSIAN_ALPHABET.length)];
+  }
+
+  function generateCookies() {
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+
+    const size = cookieSize();
+    const isMobile = window.innerWidth < 700;
+    const topOffset = isMobile ? 140 : 230;     // место под крупное фото папы
+    const bottomOffset = isMobile ? 80 : 110;
+    const margin = Math.max(8, window.innerWidth * 0.03);
+
+    const availWidth = window.innerWidth - margin * 2;
+    const availHeight = Math.max(200, window.innerHeight - topOffset - bottomOffset);
+    const cellWidth = availWidth / 3;
+    const cellHeight = availHeight / 2;
+    const jitter = Math.min(30, cellWidth * 0.12);
+
+    const correctIndex = Math.floor(Math.random() * 6);
+    const usedLetters = new Set([currentLetter]);
+    const letters = [];
+
+    for (let i = 0; i < 6; i++) {
+      if (i === correctIndex) {
+        letters.push(currentLetter);
+      } else {
+        let letter, tries = 0;
+        do { letter = getRandomLetter(); tries++; }
+        while (usedLetters.has(letter) && tries < 50);
+        letters.push(letter);
+        usedLetters.add(letter);
+      }
+    }
+
+    const positions = [];
+    for (let r = 0; r < 2; r++) {
+      for (let c = 0; c < 3; c++) {
+        let x = margin + c * cellWidth + cellWidth / 2 + (Math.random() - 0.5) * jitter * 2;
+        let y = topOffset + r * cellHeight + cellHeight / 2 + (Math.random() - 0.5) * jitter * 2;
+        x = Math.max(size / 2 + 5, Math.min(window.innerWidth - size / 2 - 5, x));
+        y = Math.max(topOffset + size / 2 - 30, Math.min(window.innerHeight - bottomOffset - size / 2 + 20, y));
+        positions.push({ x, y });
+      }
+    }
+    positions.sort(() => Math.random() - 0.5);
+
+    const shapes = [...COOKIE_SHAPES].sort(() => Math.random() - 0.5);
+    const colors = [...COOKIE_COLORS].sort(() => Math.random() - 0.5);
+
+    letters.forEach((letter, i) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'cookie';
+      wrapper.style.left = (positions[i].x - size / 2) + 'px';
+      wrapper.style.top = (positions[i].y - size / 2) + 'px';
+      wrapper.appendChild(createCookieSVG(letter, shapes[i], colors[i]));
+      wrapper.addEventListener('click', () => onCookieClick(wrapper, letter === currentLetter, positions[i]));
+      board.appendChild(wrapper);
+    });
+  }
+
+  // ================= КЛИК ПО ПЕЧЕНЬКЕ =================
+  function onCookieClick(element, isCorrect, position) {
+    if (busy) return;
+    if (element.classList.contains('popped')) return;
+
+    if (isCorrect) {
+      busy = true;
+      wrongActive = false;
+      element.classList.add('popped');
+      createConfetti(position.x, position.y, 110);
+      createFirework(position.x, position.y);
+      playSound('correct');
+      setSpeech('Мяу! Правильно! 🎉');
+
+      // СЮРПРИЗ: картинки 1.png ... 20.png по кругу (только при правильном ответе!)
+      showSurprise(surpriseNum, position.x, position.y);
+      surpriseNum = surpriseNum % SURPRISE_COUNT + 1;
+
+      score++;
+      document.getElementById('score').textContent = '⭐ ' + score;
+
+      const t = roundToken;
+      setTimeout(() => { if (t === roundToken) startRound(); }, 3800);
+    } else {
+      // ОШИБКА: тряска + чуть-чуть конфетти. НИКАКИХ картинок не показываем.
+      element.classList.remove('shake');
+      void element.offsetWidth;              // перезапуск анимации тряски
+      element.classList.add('shake');
+      createConfetti(position.x, position.y, 25);
+
+      if (wrongActive) return;               // не накладываем озвучку друг на друга
+      wrongActive = true;
+
+      const t = roundToken;
+      setSpeech('Ой, это не та печенька! 🙈');
+
+      // Ждём конца wrong.mp3, затем возвращаем задание в пузырь И проговариваем его
+      playSoundThen('wrong', 2200, () => {
+        wrongActive = false;
+        if (t !== roundToken) return;        // уже идёт новое задание
+        showTaskBubble();
+        playSound('find_' + currentLetter.toLowerCase());
+      });
+    }
+  }
+
+  // ================= ФОТО-СЮРПРИЗ =================
+  function showSurprise(num, x, y) {
+    clearTimeout(surpriseTimeout);
+    document.querySelectorAll('.surprise').forEach(c => c.remove());
+
+    const size = Math.min(320, Math.floor(window.innerWidth * 0.38), Math.floor(window.innerHeight * 0.55));
+    const img = document.createElement('img');
+    img.className = 'surprise';
+    img.style.width = size + 'px';
+    img.style.height = size + 'px';
+
+    let left = x - size / 2;
+    let top = y - size - 25;
+    if (top < 130) top = y - size / 2;
+    left = Math.max(10, Math.min(window.innerWidth - size - 10, left));
+    top = Math.max(120, Math.min(window.innerHeight - size - 15, top));
+    img.style.left = left + 'px';
+    img.style.top = top + 'px';
+
+    // Пробуем расширения по порядку: png -> jpg -> jpeg
+    const exts = surpriseExtCache[num] ? [surpriseExtCache[num]] : SURPRISE_EXTS;
+    let i = 0;
+    img.onload = () => { surpriseExtCache[num] = exts[i]; };
+    img.onerror = () => {
+      i++;
+      if (i >= exts.length) { img.remove(); return; } // файла нет вообще
+      img.src = 'images/' + num + '.' + exts[i];
+    };
+    img.src = 'images/' + num + '.' + exts[0];
+
+    document.body.appendChild(img);
+
+    surpriseTimeout = setTimeout(() => {
+      img.style.opacity = '0';
+      img.style.transform = 'scale(0.6)';
+      setTimeout(() => img.remove(), 500);
+    }, 2800);
+  }
+
+  function hideSurprises() {
+    clearTimeout(surpriseTimeout);
+    document.querySelectorAll('.surprise').forEach(c => c.remove());
+  }
+
+  // ================= ХОД ИГРЫ =================
+  function startRound() {
+    roundToken++;
+    busy = false;
+    wrongActive = false;
+    hideSurprises();
+    currentLetter = getRandomLetter();
+    generateCookies();
+    showTaskBubble();
+    playSound('find_' + currentLetter.toLowerCase());
+  }
+
+  function nextTask() { startRound(); }
+
+  function repeatTask() {
+    if (busy) return;
+    wrongActive = false;
+    showTaskBubble();
+    playSound('find_' + currentLetter.toLowerCase());
+  }
+
+  function preloadSurprises() {
+    for (let i = 1; i <= SURPRISE_COUNT; i++) {
+      preloadSurpriseWithFallback(i, 0);
+    }
+  }
+
+  function preloadSurpriseWithFallback(num, extIndex) {
+    if (extIndex >= SURPRISE_EXTS.length) return; // файла нет ни в одном формате
+    const im = new Image();
+    im.onload = () => { surpriseExtCache[num] = SURPRISE_EXTS[extIndex]; };
+    im.onerror = () => preloadSurpriseWithFallback(num, extIndex + 1);
+    im.src = 'images/' + num + '.' + SURPRISE_EXTS[extIndex];
+  }
+
+  function startGame() {
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('gameScreen').style.display = 'block';
+    initCanvas();
+    createClouds();
+    preloadSurprises();
+
+    setSpeech('Катюша, найди печеньку с нужной буквой, нажми на неё — и откроется сюрприз!');
+
+    // Ждём ОКОНЧАНИЯ instruction.mp3, и только потом даём первое задание
+    playSoundThen('instruction', 4500, startRound);
+  }
+
+  window.addEventListener('resize', () => {
+    const canvas = document.getElementById('effects');
+    if (canvas) {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    // пересобираем поле под новый размер окна (если сейчас не идёт «празднование»)
+    clearTimeout(window.__resizeTimer);
+    window.__resizeTimer = setTimeout(() => {
+      if (!busy && currentLetter) generateCookies();
+    }, 400);
+  });
+
+  initSounds();
+</script>
+
+</body>
+</html>
