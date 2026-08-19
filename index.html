@@ -8,7 +8,10 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Chalkboard SE', 'Marker Felt', 'Comic Sans MS', cursive, sans-serif;
+    font-family: 'Chalkboard SE', 'Comic Sans MS', 'Arial Rounded MT Bold', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: bold;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 60%, #90EE90 60%, #7CCD7C 100%);
     min-height: 100vh;
     overflow: hidden;
@@ -46,6 +49,8 @@
     position: relative;
     max-width: 560px;
     line-height: 1.3;
+    font-family: inherit;
+    font-weight: bold;
   }
   .speech-bubble::before {
     content: '';
@@ -59,7 +64,7 @@
     40% { transform: scale(1.08); }
     100% { transform: scale(1); }
   }
-  .task-letter { color: #FF3D7F; font-size: 1.35em; font-weight: bold; }
+  .task-letter { color: #FF3D7F; font-size: 1.35em; }
 
   /* ---- Стартовый экран ---- */
   .start-content {
@@ -67,6 +72,7 @@
     padding: 35px 40px; border-radius: 30px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     max-width: 90%;
+    font-family: inherit;
   }
   .start-content h1 { font-size: 42px; color: #FF6B9D; margin-bottom: 15px; }
   .start-content p { font-size: 22px; color: #555; margin-bottom: 25px; line-height: 1.4; }
@@ -76,7 +82,9 @@
     padding: 18px 45px; font-size: 28px;
     border-radius: 50px; cursor: pointer;
     box-shadow: 0 6px 15px rgba(255,107,157,0.4);
-    font-family: inherit; transition: transform 0.2s;
+    font-family: inherit;
+    font-weight: bold;
+    transition: transform 0.2s;
   }
   .start-btn:hover { transform: scale(1.05); }
   .start-btn:active { transform: scale(0.98); }
@@ -89,10 +97,8 @@
   transition: transform 0.2s;
   filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
 
-  /* 👇 ДОБАВЛЕНО — жёсткий системный шрифт для iOS */
-  font-family: 'Marker Felt', -apple-system, 'Chalkboard SE', BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif !important;
-  font-style: normal !important;
-  font-variant: normal !important;
+  /* Единый стек шрифтов для печенек – перекрывает всё */
+  font-family: 'Chalkboard SE', 'Comic Sans MS', 'Arial Rounded MT Bold', 'Helvetica Neue', Arial, sans-serif !important;
   font-weight: 900 !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -145,6 +151,7 @@
     padding: 10px 22px; font-size: 18px;
     border-radius: 30px; cursor: pointer;
     font-family: inherit;
+    font-weight: bold;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     transition: all 0.2s;
   }
@@ -156,6 +163,8 @@
     border-radius: 25px; font-size: 24px; color: #FF6B9D;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     z-index: 10;
+    font-family: inherit;
+    font-weight: bold;
   }
 
   .clouds { position: absolute; inset: 0; height: 60%; pointer-events: none; z-index: 1; overflow: hidden; }
@@ -440,8 +449,9 @@
     if ('ЩШЮЪЫ'.includes(letter)) fontSize = 38;
     if ('ФЦЧ'.includes(letter)) fontSize = 42;
 
+    // Единый стек шрифтов и жирное начертание внутри SVG
     svg.innerHTML = shapePath +
-      `<text x="50" y="${50 + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-weight="bold" fill="#5a3a1f" font-family="'Chalkboard SE', normal" style="paint-order:stroke;stroke:#fff;stroke-width:2">${letter}</text>`;
+      `<text x="50" y="${50 + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}" font-weight="bold" fill="#5a3a1f" font-family="'Chalkboard SE','Comic Sans MS','Arial Rounded MT Bold','Helvetica Neue',Arial,sans-serif" style="paint-order:stroke;stroke:#fff;stroke-width:2">${letter}</text>`;
 
     return svg;
   }
