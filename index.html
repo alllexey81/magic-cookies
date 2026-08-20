@@ -46,18 +46,23 @@
   }
   .speech-bubble {
     background: white;
-    padding: 18px 28px;
+    padding: 16px 20px;
     border-radius: 24px;
-    font-size: 27px;
+    font-size: 28px;              /* чуть больше текста */
     color: #333;
     box-shadow: 0 5px 12px rgba(0,0,0,0.2);
     position: relative;
-    max-width: 560px;
-    line-height: 1.3;
+    /* Пузырик растягивается внутри header-left и занимает доступное пространство */
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto; min-width: 0; max-width: none;
+    min-height: 64px;
+    line-height: 1.2;
+    padding-right: 22px; /* чтобы текст не прилегал слишком сильно к краю */
   }
   .speech-bubble::before {
     content: '';
-    position: absolute; left: -20px; top: 34px;
+    position: absolute; left: -20px; top: 50%; transform: translateY(-50%);
     border: 11px solid transparent;
     border-right-color: white;
   }
@@ -67,7 +72,7 @@
     40% { transform: scale(1.08); }
     100% { transform: scale(1); }
   }
-  .task-letter { color: #FF3D7F; font-size: 1.35em; font-weight: bold; }
+  .task-letter { color: #FF3D7F; font-size: 1.45em; font-weight: bold; }
 
   /* ---- Стартовый экран ---- */
   .start-content {
@@ -185,9 +190,9 @@
     .header-left { gap: 10px; }
     .dad-photo { width: 64px; height: 64px; border-width: 4px; flex: 0 0 auto; }
     .speech-bubble {
-      font-size: 16px; padding: 9px 12px; line-height: 1.25;
+      font-size: 18px; padding: 10px 12px; line-height: 1.2;
       max-width: none;              /* пузырь сам сжимается во flex-строке */
-      flex: 1 1 auto; min-width: 0;
+      flex: 1 1 auto; min-width: 0; min-height:56px;
     }
     .speech-bubble::before { top: 16px; }
     .score { font-size: 17px; padding: 7px 12px; }
@@ -199,7 +204,7 @@
   /* Совсем узкие экраны (iPhone SE / mini) */
   @media (max-width: 400px) {
     .dad-photo { width: 54px; height: 54px; }
-    .speech-bubble { font-size: 14px; padding: 7px 10px; }
+    .speech-bubble { font-size: 16px; padding: 8px 10px; min-height:52px; }
     .score { font-size: 15px; padding: 6px 10px; }
   }
 </style>
@@ -239,7 +244,7 @@
 <script>
   const RUSSIAN_ALPHABET = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split('');
   const SURPRISE_COUNT = 20;               // картинки 1 ... 20
-  const SURPRISE_EXTS = ['png', 'jpg', 'jpeg'];  // какие расширения пробовать
+  const SURPRISE_EXTS = ['png','jpg','jpeg','PNG','JPG','JPEG'];  // какие расширения пробовать
   const surpriseExtCache = {};             // игра запоминает, где какой формат
   const COOKIE_COLORS = [
     { main: '#F4A4A4', dark: '#C97070' },
@@ -317,7 +322,7 @@
   }
 
   function showTaskBubble() {
-    setSpeech('Найди <span class="task-letter">«' + currentLetter + '»</span>!');
+    setSpeech('Найди букву <span class="task-letter">«' + currentLetter + '»</span>!');
   }
 
   // ================= ОБЛАКА =================
